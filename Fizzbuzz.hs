@@ -1,14 +1,31 @@
+import Control.Applicative
+
+joinMaybe :: Maybe a -> Maybe a -> Maybe [a]
+joinMaybe (Just x) (Just y) = Just [x, y]
+joinMaybe (Just x) Nothing = Just [x]
+joinMaybe Nothing (Just y) = Just [y]
+joinMaybe Nothing Nothing = Nothing
+
+maybeToEither :: Maybe a -> b -> Either a b
+maybeToEither (Just x) _ = Left x
+maybeToEither Nothing y = Right y
+
 data FB = Fizz | Buzz | Fizzbuzz deriving (Show,Eq)
 
-fizzbuzz :: Int -> Either FB Int
-fizzbuzz n = case (mod n 3, mod n 5) of
-               (0,0) -> Left Fizzbuzz
-               (0,_) -> Left Fizz
-               (_,0) -> Left Buzz
-               _     -> Right n
+fizzes :: [Maybe FB]
+fizzes = cycle [Nothing, Nothing, Just Fizz]
 
-showEither :: (Show a, Show b) => Either a b -> String
-showEither = either show show
+buzzes :: [Maybe FB]
+buzzes = cycle [Nothing, Nothing, Nothing, Nothing, Just Buzz]
+
+fizzbuzzes :: [Maybe [FB]]
+fizzbuzzes = zipWith joinMaybe fizzes buzzes
+
+ints :: [Int]
+ints = [1..]
+
+fizzbuzz :: [Either [FB] Int]
+fizzbuzz = zipWith maybeToEither fizzbuzzes ints
 
 main :: IO ()
-main = print $ fmap (showEither . fizzbuzz) [1..20]
+main = print $ either show show <$> take 30 fizzbuzz
