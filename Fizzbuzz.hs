@@ -1,18 +1,14 @@
 data FB = Fizz | Buzz | Fizzbuzz deriving (Show,Eq)
 
-matcher :: Int -> Int -> Maybe FB
-matcher 0 0 = Just Fizzbuzz
-matcher 0 _ = Just Fizz
-matcher _ 0 = Just Buzz
-matcher _ _ = Nothing
+fizzbuzz :: Int -> Either FB Int
+fizzbuzz n = case (mod n 3, mod n 5) of
+               (0,0) -> Left Fizzbuzz
+               (0,_) -> Left Fizz
+               (_,0) -> Left Buzz
+               _     -> Right n
 
-veilOver :: Int -> Either FB Int
-veilOver n = case matcher (mod n 3) (mod n 5) of
-                Nothing -> Right n
-                Just x  -> Left x
-
-fizzbuzz :: [Int] -> [Either FB Int]
-fizzbuzz = fmap veilOver
+showEither :: (Show a, Show b) => Either a b -> String
+showEither = either show show
 
 main :: IO ()
-main = print (fmap (either show show) (fizzbuzz [1..20]))
+main = print $ fmap (showEither . fizzbuzz) [1..20]
