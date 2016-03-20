@@ -19,4 +19,4 @@ showEither :: (Show a,Show b)
 showEither = either show show
 
 main :: IO ()
-main = print $ fmap (showEither . fizzbuzz) [1..20]
+main = print (showEither . fizzbuzz <$> [1 .. 20])
